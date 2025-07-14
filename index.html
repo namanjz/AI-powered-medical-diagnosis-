@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Diagnostic Tool - Health Assessment System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .assessment-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .symptom-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .symptom-checkbox:hover {
+            background: #e9ecef;
+        }
+
+        .symptom-checkbox input {
+            margin-right: 8px;
+            width: auto;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-panel h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .risk-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .risk-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .risk-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .risk-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .risk-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+        .possible-conditions {
+            margin-bottom: 25px;
+        }
+
+        .condition-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .condition-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .condition-probability {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .recommendations {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .recommendations h3 {
+            color: #1565c0;
+            margin-bottom: 15px;
+        }
+
+        .recommendation-item {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #bbdefb;
+        }
+
+        .recommendation-item:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            padding: 20px;
+            margin: 20px 40px;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .disclaimer strong {
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .symptoms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 AI Diagnostic Tool</h1>
+            <p>Advanced Health Assessment & Early Detection System</p>
+        </div>
+
+        <div class="main-content">
+            <div class="assessment-form">
+                <h2>Health Assessment Form</h2>
+                <form id="diagnosticForm">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="1" max="120" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration">How long have you been experiencing symptoms?</label>
+                        <select id="duration" name="duration" required>
+                            <option value="">Select Duration</option>
+                            <option value="hours">Less than 24 hours</option>
+                            <option value="days">1-7 days</option>
+                            <option value="weeks">1-4 weeks</option>
+                            <option value="months">More than a month</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="severity">Symptom Severity (1-10)</label>
+                        <input type="range" id="severity" name="severity" min="1" max="10" value="5">
+                        <span id="severityValue">5</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Your Symptoms:</label>
+                        <div class="symptoms-grid">
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="fever" name="symptoms" value="fever">
+                                <label for="fever">Fever</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="cough" name="symptoms" value="cough">
+                                <label for="cough">Cough</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="headache" name="symptoms" value="headache">
+                                <label for="headache">Headache</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="fatigue" name="symptoms" value="fatigue">
+                                <label for="fatigue">Fatigue</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="nausea" name="symptoms" value="nausea">
+                                <label for="nausea">Nausea</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="chest_pain" name="symptoms" value="chest_pain">
+                                <label for="chest_pain">Chest Pain</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="shortness_breath" name="symptoms" value="shortness_breath">
+                                <label for="shortness_breath">Shortness of Breath</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="abdominal_pain" name="symptoms" value="abdominal_pain">
+                                <label for="abdominal_pain">Abdominal Pain</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="dizziness" name="symptoms" value="dizziness">
+                                <label for="dizziness">Dizziness</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="joint_pain" name="symptoms" value="joint_pain">
+                                <label for="joint_pain">Joint Pain</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="rash" name="symptoms" value="rash">
+                                <label for="rash">Skin Rash</label>
+                            </div>
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="sore_throat" name="symptoms" value="sore_throat">
+                                <label for="sore_throat">Sore Throat</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medical_history">Medical History (Optional)</label>
+                        <textarea id="medical_history" name="medical_history" rows="3" placeholder="Any relevant medical conditions, medications, or allergies..."></textarea>
+                    </div>
+
+                    <button type="submit" class="analyze-btn">🔍 Analyze Symptoms</button>
+                </form>
+            </div>
+
+            <div class="results-panel">
+                <h2>Diagnostic Results</h2>
+                <div id="results-content">
+                    <p style="text-align: center; color: #666; margin-top: 50px;">
+                        Complete the assessment form to get your AI-powered health analysis
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Important Disclaimer:</strong> This AI diagnostic tool is for informational purposes only and should not replace professional medical advice. Always consult with a qualified healthcare provider for proper diagnosis and treatment. In case of emergency, contact emergency services immediately.
+        </div>
+    </div>
+
+    <script>
+        // Medical knowledge base
+        const medicalKnowledgeBase = {
+            conditions: {
+                'common_cold': {
+                    name: 'Common Cold',
+                    symptoms: ['cough', 'sore_throat', 'fatigue', 'headache'],
+                    severity_range: [1, 5],
+                    age_factor: 0.8,
+                    description: 'Viral upper respiratory infection'
+                },
+                'flu': {
+                    name: 'Influenza',
+                    symptoms: ['fever', 'cough', 'fatigue', 'headache', 'joint_pain'],
+                    severity_range: [4, 8],
+                    age_factor: 1.2,
+                    description: 'Viral infection affecting respiratory system'
+                },
+                'pneumonia': {
+                    name: 'Pneumonia',
+                    symptoms: ['fever', 'cough', 'chest_pain', 'shortness_breath', 'fatigue'],
+                    severity_range: [6, 10],
+                    age_factor: 1.5,
+                    description: 'Infection that inflames air sacs in lungs'
+                },
+                'gastroenteritis': {
+                    name: 'Gastroenteritis',
+                    symptoms: ['nausea', 'abdominal_pain', 'fever', 'fatigue'],
+                    severity_range: [3, 7],
+                    age_factor: 1.0,
+                    description: 'Inflammation of stomach and intestines'
+                },
+                'migraine': {
+                    name: 'Migraine',
+                    symptoms: ['headache', 'nausea', 'dizziness', 'fatigue'],
+                    severity_range: [5, 9],
+                    age_factor: 0.9,
+                    description: 'Severe headache disorder'
+                },
+                'allergic_reaction': {
+                    name: 'Allergic Reaction',
+                    symptoms: ['rash', 'shortness_breath', 'nausea', 'dizziness'],
+                    severity_range: [2, 8],
+                    age_factor: 1.0,
+                    description: 'Immune system response to allergen'
+                },
+                'anxiety': {
+                    name: 'Anxiety/Stress',
+                    symptoms: ['chest_pain', 'shortness_breath', 'dizziness', 'fatigue'],
+                    severity_range: [3, 7],
+                    age_factor: 0.9,
+                    description: 'Mental health condition causing physical symptoms'
+                }
+            },
+            
+            riskFactors: {
+                age: {
+                    high: [65, 120],
+                    medium: [50, 64],
+                    low: [1, 49]
+                },
+                duration: {
+                    high: ['months'],
+                    medium: ['weeks'],
+                    low: ['days', 'hours']
+                }
+            }
+        };
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('diagnosticForm');
+            const severitySlider = document.getElementById('severity');
+            const severityValue = document.getElementById('severityValue');
+
+            // Update severity display
+            severitySlider.addEventListener('input', function() {
+                severityValue.textContent = this.value;
+            });
+
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                analyzeSymptoms();
+            });
+        });
+
+        function analyzeSymptoms() {
+            const resultsContent = document.getElementById('results-content');
+            
+            // Show loading state
+            resultsContent.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>AI is analyzing your symptoms...</p>
+                </div>
+            `;
+
+            // Simulate AI processing time
+            setTimeout(() => {
+                const formData = new FormData(document.getElementById('diagnosticForm'));
+                const symptoms = Array.from(document.querySelectorAll('input[name="symptoms"]:checked')).map(cb => cb.value);
+                
+                const analysis = performDiagnosticAnalysis({
+                    age: parseInt(formData.get('age')),
+                    gender: formData.get('gender'),
+                    duration: formData.get('duration'),
+                    severity: parseInt(formData.get('severity')),
+                    symptoms: symptoms,
+                    medicalHistory: formData.get('medical_history')
+                });
+
+                displayResults(analysis);
+            }, 2000);
+        }
+
+        function performDiagnosticAnalysis(patientData) {
+            const { age, duration, severity, symptoms } = patientData;
+            const possibleConditions = [];
+
+            // Analyze each condition in knowledge base
+            Object.entries(medicalKnowledgeBase.conditions).forEach(([key, condition]) => {
+                let probability = 0;
+                let matchingSymptoms = 0;
+
+                // Check symptom matches
+                condition.symptoms.forEach(symptom => {
+                    if (symptoms.includes(symptom)) {
+                        matchingSymptoms++;
+                    }
+                });
+
+                // Calculate base probability
+                probability = (matchingSymptoms / condition.symptoms.length) * 100;
+
+                // Adjust for severity
+                if (severity >= condition.severity_range[0] && severity <= condition.severity_range[1]) {
+                    probability *= 1.2;
+                }
+
+                // Age factor
+                if (age > 60) {
+                    probability *= condition.age_factor;
+                }
+
+                // Duration factor
+                if (duration === 'months' && condition.name.includes('chronic')) {
+                    probability *= 1.3;
+                }
+
+                if (probability > 20) {
+                    possibleConditions.push({
+                        name: condition.name,
+                        probability: Math.min(probability, 95),
+                        description: condition.description,
+                        matchingSymptoms: matchingSymptoms
+                    });
+                }
+            });
+
+            // Sort by probability
+            possibleConditions.sort((a, b) => b.probability - a.probability);
+
+            // Calculate overall risk level
+            const riskLevel = calculateRiskLevel(patientData, possibleConditions);
+
+            // Generate recommendations
+            const recommendations = generateRecommendations(patientData, possibleConditions, riskLevel);
+
+            return {
+                riskLevel,
+                possibleConditions: possibleConditions.slice(0, 5),
+                recommendations
+            };
+        }
+
+        function calculateRiskLevel(patientData, conditions) {
+            const { age, severity, duration, symptoms } = patientData;
+            let riskScore = 0;
+
+            // Age factor
+            if (age > 65) riskScore += 2;
+            else if (age > 50) riskScore += 1;
+
+            // Severity factor
+            if (severity >= 8) riskScore += 3;
+            else if (severity >= 6) riskScore += 2;
+            else if (severity >= 4) riskScore += 1;
+
+            // Duration factor
+            if (duration === 'months') riskScore += 2;
+            else if (duration === 'weeks') riskScore += 1;
+
+            // Critical symptoms
+            const criticalSymptoms = ['chest_pain', 'shortness_breath', 'severe_headache'];
+            criticalSymptoms.forEach(symptom => {
+                if (symptoms.includes(symptom)) riskScore += 2;
+            });
+
+            // High probability conditions
+            if (conditions.length > 0 && conditions[0].probability > 70) {
+                riskScore += 1;
+            }
+
+            if (riskScore >= 6) return 'high';
+            if (riskScore >= 3) return 'medium';
+            return 'low';
+        }
+
+        function generateRecommendations(patientData, conditions, riskLevel) {
+            const recommendations = [];
+            const { symptoms, severity, duration } = patientData;
+
+            if (riskLevel === 'high') {
+                recommendations.push('🚨 Seek immediate medical attention');
+                recommendations.push('📞 Consider visiting emergency room or urgent care');
+                recommendations.push('📝 Bring this analysis to your healthcare provider');
+            } else if (riskLevel === 'medium') {
+                recommendations.push('🏥 Schedule appointment with primary care physician');
+                recommendations.push('📊 Monitor symptoms and track changes');
+                recommendations.push('💊 Follow prescribed medications if any');
+            } else {
+                recommendations.push('🏠 Monitor symptoms at home');
+                recommendations.push('💧 Stay hydrated and get adequate rest');
+                recommendations.push('🌡️ Track temperature and symptom progression');
+            }
+
+            // Specific symptom recommendations
+            if (symptoms.includes('fever')) {
+                recommendations.push('🌡️ Use fever-reducing medications as directed');
+            }
+            if (symptoms.includes('cough')) {
+                recommendations.push('🍯 Try honey or throat lozenges for cough relief');
+            }
+            if (symptoms.includes('headache')) {
+                recommendations.push('😴 Ensure adequate sleep and reduce screen time');
+            }
+
+            recommendations.push('📱 Follow up if symptoms worsen or persist');
+            
+            return recommendations;
+        }
+
+        function displayResults(analysis) {
+            const resultsContent = document.getElementById('results-content');
+            
+            const riskColors = {
+                low: 'risk-low',
+                medium: 'risk-medium',
+                high: 'risk-high'
+            };
+
+            const riskIcons = {
+                low: '🟢',
+                medium: '🟡',
+                high: '🔴'
+            };
+
+            const riskLabels = {
+                low: 'Low Risk',
+                medium: 'Medium Risk',
+                high: 'High Risk'
+            };
+
+            let conditionsHTML = '';
+            analysis.possibleConditions.forEach(condition => {
+                conditionsHTML += `
+                    <div class="condition-item">
+                        <div class="condition-name">${condition.name}</div>
+                        <div class="condition-probability">
+                            Probability: ${condition.probability.toFixed(1)}% | 
+                            ${condition.description}
+                        </div>
+                    </div>
+                `;
+            });
+
+            let recommendationsHTML = '';
+            analysis.recommendations.forEach(rec => {
+                recommendationsHTML += `<div class="recommendation-item">${rec}</div>`;
+            });
+
+            resultsContent.innerHTML = `
+                <div class="risk-indicator ${riskColors[analysis.riskLevel]}">
+                    <span class="risk-icon">${riskIcons[analysis.riskLevel]}</span>
+                    <span>Risk Level: ${riskLabels[analysis.riskLevel]}</span>
+                </div>
+
+                <div class="possible-conditions">
+                    <h3>Possible Conditions</h3>
+                    ${conditionsHTML || '<p>No specific conditions identified based on current symptoms.</p>'}
+                </div>
+
+                <div class="recommendations">
+                    <h3>AI Recommendations</h3>
+                    ${recommendationsHTML}
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em; color: #666;">
+                    <strong>Analysis Complete:</strong> This assessment is based on symptom patterns and medical databases. 
+                    Results should be discussed with a healthcare professional for proper diagnosis and treatment.
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
